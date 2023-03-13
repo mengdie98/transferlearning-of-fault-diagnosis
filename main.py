@@ -27,12 +27,12 @@ def get_parser():
 
     # data loading related
     # parser.add_argument('--data_dir', type=str, default='D:\save data\OFFICE31')
-    parser.add_argument('--data_dir', type=str, default=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730')
-    parser.add_argument('--src_domain', type=str, default='7')
-    parser.add_argument('--tgt_domain', type=str, default='21')
+    parser.add_argument('--data_dir', type=str, default=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End')
+    parser.add_argument('--src_domain', type=str, default=r'1730\7')
+    parser.add_argument('--tgt_domain', type=str, default=r'1797\7')
     
     # training related
-    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--n_epoch', type=int, default=20)
     parser.add_argument('--early_stop', type=int, default=15, help="Early stopping")
     parser.add_argument('--epoch_based_training', type=str2bool, default=False, help="Epoch-based training / Iteration-based training")
@@ -215,6 +215,23 @@ def train(source_loader, target_train_loader, target_test_loader, model, optimiz
         print(info)
     print('Transfer result: {:.4f}'.format(best_acc))
 
+def main2():
+    parser = get_parser()
+    args = parser.parse_args()
+    setattr(args, "device", torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+    setattr(args, "max_iter", args.n_epoch * args.n_iter_per_epoch)
+    path = r"D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1797\7"
+    train, test_loader, nclass = data_loader.load_split_data(data_folder=path,batch_size=32,train_split=0.01)
+    weights_path = "mymodel_resnet34.pth"
+    model = models.get_pretrain_model(args, weights_path)
+    assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
+    model.load_state_dict(torch.load(weights_path))
+    
+    model.to(args.device)
+    model.eval()
+    acc = test(model, test_loader, args)
+    print(acc)
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -264,5 +281,5 @@ def pretrain():
         torch.save(model.state_dict(), 'mymodel_resnet34.pt')
 
 if __name__ == "__main__":
-    pretrain()
-    main()
+    # pretrain()
+    main2()

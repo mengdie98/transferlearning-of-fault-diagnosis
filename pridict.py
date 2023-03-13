@@ -12,7 +12,7 @@ import pandas as pd
 import models
 from torchvision import transforms,datasets
 from PIL import Image
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import json
 from pretrain import *
 
@@ -38,7 +38,7 @@ def main1(path):
     model = models.TransferNet(num_class=6)
 
     # load model weights
-    weights_path = "D:\save data\Python\mymodel.pth"
+    weights_path = "mymodel_resnet34.pth"
     assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
     model.load_state_dict(torch.load(weights_path))
 
@@ -65,14 +65,10 @@ def main1(path):
         plt.show()
         
 def main2():
-    path = r"E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1730\21"
+    path = r"D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1797\7"
     train, test_loader, nclass = load_split_data(data_folder=path,batch_size=32,train_split=0.01)
-    model = models.TransferNet(num_class=6).to(DEVICE)
-    # n_features = model.fc.in_features
-    # fc = torch.nn.Linear(n_features, nclass)
-    # model.fc = fc
-    # load model weights
-    weights_path = "D:\save data\Python\mymodel_resnet18.pth"
+    weights_path = "mymodel_resnet34.pth"
+    model = models.get_pretrain_model(args, weights_path)
     assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
     model.load_state_dict(torch.load(weights_path))
     
