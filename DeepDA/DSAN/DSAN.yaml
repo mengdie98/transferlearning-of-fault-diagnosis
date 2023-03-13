@@ -1,5 +1,5 @@
 # Backbone
-backbone: resnet50
+backbone: resnet34
 
 # Transfer loss related
 transfer_loss_weight: 0.5

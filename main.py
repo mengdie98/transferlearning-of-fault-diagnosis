@@ -17,17 +17,62 @@ def get_parser():
     )
     # general configuration
     # parser.add("--config", is_config_file=True, default='', help="config file path")
-    parser.add("--config", default='/content/transferlearning\code\DeepDA\DANN\DANN.yaml', help="config file path")
+    parser.add("--config", default='DeepDA\DSAN\DSAN.yaml', help="config file path")
     parser.add("--seed", type=int, default=1)
     parser.add_argument('--num_workers', type=int, default=3)
     
     # network related
-    parser.add_argument('--backbone', type=str, default='resnet18')
+    parser.add_argument('--backbone', type=str, default='resnet34')
     parser.add_argument('--use_bottleneck', type=str2bool, default=True)
 
     # data loading related
     # parser.add_argument('--data_dir', type=str, default='D:\save data\OFFICE31')
-    parser.add_argument('--data_dir', type=str, default=r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1797')
+    parser.add_argument('--data_dir', type=str, default=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730')
+    parser.add_argument('--src_domain', type=str, default='7')
+    parser.add_argument('--tgt_domain', type=str, default='21')
+    
+    # training related
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--n_epoch', type=int, default=20)
+    parser.add_argument('--early_stop', type=int, default=15, help="Early stopping")
+    parser.add_argument('--epoch_based_training', type=str2bool, default=False, help="Epoch-based training / Iteration-based training")
+    parser.add_argument("--n_iter_per_epoch", type=int, default=500, help="Used in Iteration-based training")
+
+    # optimizer related
+    parser.add_argument('--lr', type=float, default=1e-2)
+    parser.add_argument('--momentum', type=float, default=0.9)
+    parser.add_argument('--weight_decay', type=float, default=5e-4)
+
+    # learning rate scheduler related
+    parser.add_argument('--lr_gamma', type=float, default=0.0003)
+    parser.add_argument('--lr_decay', type=float, default=0.75)
+    parser.add_argument('--lr_scheduler', type=str2bool, default=True)
+
+    # transfer related
+    parser.add_argument('--transfer_loss_weight', type=float, default=0.5)
+    parser.add_argument('--transfer_loss', type=str, default='lmmd')
+    return parser
+
+# def get_parser2():
+    """Get default arguments."""
+    parser = configargparse.ArgumentParser(
+        description="Transfer learning config parser",
+        config_file_parser_class=configargparse.YAMLConfigFileParser,
+        formatter_class=configargparse.ArgumentDefaultsHelpFormatter,
+    )
+    # general configuration
+    # parser.add("--config", is_config_file=True, default='', help="config file path")
+    parser.add("--config", default='DeepDA\DSAN\DSAN.yaml', help="config file path")
+    parser.add("--seed", type=int, default=1)
+    parser.add_argument('--num_workers', type=int, default=3)
+    
+    # network related
+    parser.add_argument('--backbone', type=str, default='resnet34')
+    parser.add_argument('--use_bottleneck', type=str2bool, default=True)
+
+    # data loading related
+    # parser.add_argument('--data_dir', type=str, default='D:\save data\OFFICE31')
+    parser.add_argument('--data_dir', type=str, default=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730')
     parser.add_argument('--src_domain', type=str, default='7')
     parser.add_argument('--tgt_domain', type=str, default='21')
     
@@ -183,7 +228,7 @@ def main():
     else:
         setattr(args, "max_iter", args.n_epoch * args.n_iter_per_epoch)
     # model = get_model(args)
-    weights_path = r"D:\save data\Python\mymodel_resnet18.pth"
+    weights_path = "mymodel_resnet34.pth"
     model = models.get_pretrain_model(args, weights_path)
     optimizer = get_optimizer(model, args)
     
@@ -193,16 +238,16 @@ def main():
         scheduler = None
     train(source_loader, target_train_loader, target_test_loader, model, optimizer, scheduler, args)
     try:
-        torch.save(model.state_dict(), 'mymodel_transfer_resnet18.pth')
+        torch.save(model.state_dict(), 'mymodel_transfer_resnet34.pth')
     except:
-        torch.save(model.state_dict(), 'mymodel_transfer_resnet18.pt')
+        torch.save(model.state_dict(), 'mymodel_transfer_resnet34.pt')
     
 def pretrain():
     parser = get_parser()
     args = parser.parse_args()
     setattr(args, "device", torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
     setattr(args, "DEVICE", torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
-    train_loader, test_loader, n_class = data_loader.load_split_data(data_folder = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1730\7',
+    train_loader, test_loader, n_class = data_loader.load_split_data(data_folder = r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730\7',
                                                          batch_size = args.batch_size,
                                                          train_split=0.7)
     setattr(args, "n_class", n_class)
@@ -214,9 +259,10 @@ def pretrain():
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     models.pretrain(train_loader, test_loader, model, optimizer, args)
     try:
-        torch.save(model.state_dict(), 'mymodel_resnet18.pth')
+        torch.save(model.state_dict(), 'mymodel_resnet34.pth')
     except:
-        torch.save(model.state_dict(), 'mymodel_resnet18.pt')
+        torch.save(model.state_dict(), 'mymodel_resnet34.pt')
 
 if __name__ == "__main__":
+    pretrain()
     main()

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from PIL import Image, ImageStat
+# from PIL import Image, ImageStat
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms,datasets
@@ -18,18 +18,19 @@ def get_dataset_statistics(path, image_size=(224, 224)):
     Returns:
         数据集图像数据的均值和标准差，形如((R_mean, G_mean, B_mean), (R_std, G_std, B_std))
     """
-    img_list = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if file.endswith(".jpg") or file.endswith(".png"):
-                img = Image.open(os.path.join(root, file)).convert('RGB')
-                img = img.resize(image_size)
-                img_list.append(np.array(img))
+    # img_list = []
+    # for root, dirs, files in os.walk(path):
+    #     for file in files:
+    #         if file.endswith(".jpg") or file.endswith(".png"):
+    #             img = Image.open(os.path.join(root, file)).convert('RGB')
+    #             img = img.resize(image_size)
+    #             img_list.append(np.array(img))
 
-    img_array = np.array(img_list)
-    mean = np.mean(img_array, axis=(0, 1, 2))
-    std = np.std(img_array, axis=(0, 1, 2))
-    return mean, std
+    # img_array = np.array(img_list)
+    # mean = np.mean(img_array, axis=(0, 1, 2))
+    # std = np.std(img_array, axis=(0, 1, 2))
+    # return mean, std
+    return 1
 
 
 def load_split_data(data_folder, batch_size, train_split, num_workers=4, **kwargs):

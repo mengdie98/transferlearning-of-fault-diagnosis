@@ -5,7 +5,7 @@ from PIL import Image, ImageStat
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import torchvision
-from dataloader import load_split_data
+from data_loader import load_split_data
 import random
 import utils
 import pandas as pd

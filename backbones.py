@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 from torchvision import models
+import torch.utils.model_zoo as model_zoo
 
 resnet_dict = {
     "resnet18": models.resnet18,
@@ -72,7 +73,12 @@ class AlexNetBackbone(nn.Module):
 class ResNetBackbone(nn.Module):
     def __init__(self, network_type):
         super(ResNetBackbone, self).__init__()
+        
+        # model_url = 'http://download.pytorch.org/models/resnet34-333f7ec4.pth'
+        # state_dict = model_zoo.load_url(model_url, progress=True)
+        # 加载预训练模型的参数
         resnet = resnet_dict[network_type](pretrained=True)
+        # self.resnet.load_state_dict(state_dict)
         self.conv1 = resnet.conv1
         self.bn1 = resnet.bn1
         self.relu = resnet.relu
