@@ -123,6 +123,11 @@ def get_pretrain_model(args, weights_path):
     model.load_state_dict(torch.load(weights_path))
     return model
 
+def get_model(args, weights_path=''):
+    model = TransferNet(
+        6, transfer_loss=args.transfer_loss, base_net=args.backbone, max_iter=args.max_iter, use_bottleneck=args.use_bottleneck).to(args.device)
+    return model
+
 def test(model, test_loader, args):
     model.eval().to(args.DEVICE)
     correct = 0
