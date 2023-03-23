@@ -172,8 +172,10 @@ def pretrain(train_loader, test_loader, model, optimizer, args):
         pd.DataFrame.from_dict(log).to_csv('train_log.csv', header=[
             'Epoch', 'train_loss', 'acc'])
         print(f'Epoch: [{e:2d}/{args.n_epoch}], train_loss: {train_loss.avg:.4f}, acc: {acc:.4f}')
-        if best_acc < acc:
-            best_acc = acc
+        acc=format(acc)
+        acc=float(acc)
+        best_acc=90
+        if best_acc > acc:
             stop = 0
         if stop >= args.early_stop:
             break

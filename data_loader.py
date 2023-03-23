@@ -4,9 +4,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms,datasets
-from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.data.sampler import WeightedRandomSampler,Sampler
 # from sklearn.model_selection import train_test_split
 import json
+import random
 
 
 def get_dataset_statistics(path, image_size=(224, 224)):
@@ -36,7 +37,7 @@ def get_dataset_statistics(path, image_size=(224, 224)):
 def load_split_data(data_folder, batch_size, train_split, num_workers=4, **kwargs):
     transform = {
         'train': transforms.Compose(
-            [transforms.Resize([256, 256]),
+            [transforms.Resize([random.randint(224,256), random.randint(224,256)]),
                 transforms.RandomCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
@@ -61,14 +62,15 @@ def load_split_data(data_folder, batch_size, train_split, num_workers=4, **kwarg
     train_dataset, test_dataset = random_split(data, [train_size, test_size])
 
     # 为测试集设置新的transform
-    train_dataset.transform = transform['train']
+    # train_dataset.transform = transform['train']
     test_dataset.transform = transform['test']
 
-    
+    # TRSampler=MYSampler(train_dataset)
+    # TESampler=MYSampler(test_dataset)
     # 定义数据加载器
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, drop_last=False, num_workers=num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, drop_last=True, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, drop_last=True,shuffle=True, num_workers=num_workers)
     # data_loader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True if train else False, num_workers=num_workers, **kwargs)
     n_class = len(data.classes)
     return train_loader, test_loader, n_class
@@ -114,11 +116,52 @@ def load_train(root_path, dir, batch_size, phase):
     train_loader = torch.utils.data.DataLoader(data_train, batch_size=batch_size, shuffle=True, drop_last=False, num_workers=4)
     val_loader = torch.utils.data.DataLoader(data_val, batch_size=batch_size, shuffle=True, drop_last=False, num_workers=4)
     return train_loader, val_loader
-    
+
+from collections import defaultdict
+
+class MYSampler(Sampler):
+    def __init__(self, dataset, max_samples=512):
+        self.dataset = dataset
+        self.max_samples = max_samples
+        self.label_indices = defaultdict(list)
+
+        # 根据标签将所有样本的索引分组
+        for idx, (data, label) in enumerate(dataset):
+            self.label_indices[label].append(idx)
+
+    def __iter__(self):
+        indices = []
+
+        # 遍历每个标签
+        for label, indices_for_label in self.label_indices.items():
+            # 如果标签下的样本数量小于等于max_samples，直接将所有样本的索引添加到indices列表中
+            if len(indices_for_label) <= self.max_samples:
+                indices += indices_for_label
+            # 如果标签下的样本数量大于max_samples，随机选择max_samples个样本的索引
+            else:
+                indices += random.sample(indices_for_label, self.max_samples)
+
+        # 打乱所有样本的索引顺序，并返回迭代器
+        random.shuffle(indices)
+        print(indices)
+        return iter(indices)
+
+    def __len__(self):
+        # 计算所有标签下的样本数量之和
+        num_samples = sum(len(indices) for indices in self.label_indices.values())
+
+        # 如果样本数量小于等于max_samples，直接返回样本数量
+        if num_samples <= self.max_samples:
+            return num_samples
+
+        # 否则，返回max_samples * 标签数量
+        return self.max_samples * len(self.label_indices)
+
+
 def load_data(data_folder, batch_size, train, num_workers=0, **kwargs):
     transform = {
         'train': transforms.Compose(
-            [transforms.Resize([256, 256]),
+            [transforms.Resize([random.randint(224,256), random.randint(224,256)]),
                 transforms.RandomCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
@@ -133,14 +176,18 @@ def load_data(data_folder, batch_size, train, num_workers=0, **kwargs):
     data = datasets.ImageFolder(root=data_folder, transform=transform['train' if train else 'test'])
     data_loader = get_data_loader(data, batch_size=batch_size, 
                                 shuffle=True if train else False, 
-                                num_workers=num_workers, **kwargs, drop_last=True if train else False)
+                                num_workers=num_workers, drop_last=True if train else False, **kwargs)
     n_class = len(data.classes)
     return data_loader, n_class
 
 
 def get_data_loader(dataset, batch_size, shuffle=True, drop_last=False, num_workers=0, infinite_data_loader=False, **kwargs):
+    # Sampler=MYSampler(dataset)
     if not infinite_data_loader:
-        return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=num_workers, **kwargs)
+        if shuffle == True:
+            return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=num_workers, **kwargs)
+        else:
+            return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=drop_last, num_workers=num_workers, **kwargs)
     else:
         return InfiniteDataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=num_workers, **kwargs)
 
@@ -184,17 +231,8 @@ class InfiniteDataLoader:
 
 
 if __name__ == '__main__':
-    # train_loader, test_loader, n_class = load_split_data(data_folder=r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1730\7', batch_size=32, train_split=0.7)
-    # print(n_class,'/n',train_loader, test_loader)
-    a=0.006
-    b=0
-    c=1
-    d=1
-    while b < 30:
-        d = d*(c-a)
-        c=c-a
-        b+=1
-    print(a,b,c,d)
+    train_loader, test_loader, n_class = load_split_data(data_folder=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730\7', batch_size=32, train_split=0.7)
+    print(n_class,'/n',train_loader, test_loader)
 # train_dataset = CustomDataset('/path/to/dataset', transform=train_transform)
 
 # 创建数据加载器

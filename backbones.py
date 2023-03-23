@@ -75,6 +75,7 @@ class ResNetBackbone(nn.Module):
         super(ResNetBackbone, self).__init__()
         
         model_url = 'http://download.pytorch.org/models/resnet18-5c106cde.pth'
+        # model_url = 'http://download.pytorch.org/models/resnet18-f37072fd.pth'
         state_dict = model_zoo.load_url(model_url, progress=True)
         # 加载预训练模型的参数
         resnet = resnet_dict[network_type](pretrained=True)
