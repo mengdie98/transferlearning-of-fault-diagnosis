@@ -1,79 +1,88 @@
+# import os
+
+# # 设置源文件夹路径和目标文件夹路径
+# src_folder = r"E:\毕设论文\轴承数据集\轴承数据集\StandardSamples\baseline\with_box"
+# dest_folder = r"E:\毕设论文\轴承数据集\轴承数据集\StandardSamples\datapic\with_box"
+
+# # 遍历源文件夹中的所有文件
+# for filename in os.listdir(src_folder):
+#     # 排除非CSV文件
+#     if not filename.endswith(".csv"):
+#         continue
+    
+#     # 解析文件名中的转速、载荷和故障种类
+#     parts = filename[:-4].split("_")
+#     speed = parts[-3]
+#     load = parts[-2]
+#     fault_type = "_".join(parts[:-3])
+    
+#     # 构造目标文件夹路径
+#     dest_path = os.path.join(dest_folder, speed, load, fault_type, filename)
+    
+#     # 如果目标文件夹不存在，则创建它
+#     if not os.path.exists(os.path.dirname(dest_path)):
+#         os.makedirs(os.path.dirname(dest_path))
+    
+#     # 将文件移动到目标文件夹
+#     src_path = os.path.join(src_folder, filename)
+#     # os.rename(src_path, dest_path)
+
 import os
-import pandas as pd
-import scipy.io
-from scipy.fftpack import fft
-import matplotlib.pyplot as plt
-import numpy as np
-import pywt
-import multiprocessing as mp
+import random
+import pathlib
 
-def GetT_FDomainGraph(name, df, path, p):
+# 定义路径和目标文件夹
+path = r'E:\毕设论文\轴承数据集\轴承数据集\StandardSamples\datapic\with_box\1500\0'  # 原始文件夹路径
+path2 = r'E:\毕设论文\轴承数据集\轴承数据集\StandardSamples\datapic\with_box\1500\0t'  # 目标文件夹路径
 
-    df = [df[a] for a in df.columns if 'FE' in a]
-    for a in range(0,len(df[0]),128):
-        df_t = [(df[0][a:a+512], np.arange(1, 512), 'morl')]
-        result = p.starmap(pywt.cwt, df_t)
-        fig = plt.figure(figsize=[6, 24], dpi=100)
-        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+# 遍历每个子文件夹
+for subdir in os.listdir(path):
+    subdir_path = os.path.join(path, subdir)
+    if os.path.isdir(subdir_path):
+        # 创建目标文件夹
+        target_dir = os.path.join(path2, subdir)
+        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
 
-        plt.imshow(result[0][0])
-        plt.set_cmap('hot')
-        plt.axis('off')
-        plt.colorbar(shrink=0.5).remove()
-        
-        save_path = path.replace('CWRUData', 'CWRUData-picture')
-        filename = os.path.splitext(name)[0]+f'_{a/128}'+'.png'
-        plt.savefig(os.path.join(save_path, filename),bbox_inches='tight', pad_inches=0)
-        plt.clf()
-        plt.close(fig)
+        # 获取子文件夹中的所有图片
+        images = [f for f in os.listdir(subdir_path) if os.path.isfile(os.path.join(subdir_path, f))]
+        num_images = len(images)
 
-if __name__ == '__main__':
-    path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1730\7'
-    # save_path_t = r'D:\python_workfile\ML_Classify\graph'
-    # save_path_f = r'D:\python_workfile\ML_Classify\graph'
-    save_path_tf = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1730\7'
-    # fault = 'baseline'
-    # speed = ''
-    # load = ''
-    # word_list = [fault, speed, load]
-    # time_stat_namelist = ['']
-    # time_stat_chanlist = [1, 2, 3, 4, 5, 6, 7]
-    time_stat = pd.DataFrame()
+        # 随机选择20%的图片，并将它们移动到目标文件夹中
+        num_samples = int(num_images * 0.2)
+        sample_images = random.sample(images, num_samples)
+        for image in sample_images:
+            src_path = os.path.join(subdir_path, image)
+            dst_path = os.path.join(target_dir, image)
+            os.rename(src_path, dst_path)
 
-    p = mp.Pool(processes=12)
 
-    for filepath, dirnames, filenames in os.walk(path):
-        # 获取每个数据文件的时域特征值、频谱图、时频图
-        for filename in filenames:
 
-            
-            if os.path.splitext(filename)[1] == '.csv':
-                SourceData = pd.read_csv(os.path.join(filepath, filename))
-                SourceData = SourceData.loc[:, ~SourceData.columns.str.contains('^Unnamed')]
-                
-                GetT_FDomainGraph(filename, SourceData, filepath, p)
-            elif os.path.splitext(filename)[1] == '.mat':
-                data = scipy.io.loadmat(os.path.join(filepath, filename))
-                SourceData = pd.DataFrame()
-                for key in data:
-                    if not key.startswith('__'):
-                        SourceData[key] = pd.Series(data[key].flatten())
-                GetT_FDomainGraph(filename, SourceData, filepath, p)
-                
-                
-# import scipy.io
-# import pandas as pd
+# import os
+# import shutil
 
-# # 加载 .mat 文件
-# data = scipy.io.loadmat('D:\save data\Python\毕设\\12k_Drive_End_OR007@3_3_147.mat')
+# # 设置源文件夹路径
+# src_folder = "path/to/source/folder"
 
-# # 创建一个空数据框
-# df = pd.DataFrame()
-
-# # 循环遍历每个变量并添加到数据框
-# for key in data:
-#     if not key.startswith('__'):
-#         df[key] = pd.Series(data[key].flatten())
-
-# # 将数据框保存为 CSV 文件
-# df.to_csv('D:\save data\Python\毕设\\12k_Drive_End_OR007@3_3_147.csv', index=False)
+# # 遍历源文件夹中的所有文件
+# for filename in os.listdir(src_folder):
+#     # 排除非CSV文件
+#     if not filename.endswith(".csv"):
+#         continue
+    
+#     # 解析文件名中的转速、载荷和故障种类
+#     parts = filename[:-4].split("_")
+#     speed = parts[-3]
+#     load = parts[-2]
+#     fault_type = "_".join(parts[:-3])
+    
+#     # 构造目标文件夹路径
+#     dest_folder = os.path.join("path/to/destination/folder", speed, load, fault_type)
+    
+#     # 如果目标文件夹不存在，则创建它
+#     if not os.path.exists(dest_folder):
+#         os.makedirs(dest_folder)
+    
+#     # 将文件移动到目标文件夹
+#     src_path = os.path.join(src_folder, filename)
+#     dest_path = os.path.join(dest_folder, filename)
+#     shutil.move(src_path, dest_path)

@@ -1,5 +1,5 @@
 # Backbone
-backbone: resnet50
+backbone: resnet18
 
 # Transfer loss related
 transfer_loss_weight: 1.0
@@ -15,7 +15,7 @@ lr_decay: 0.75
 
 # Training related
 n_iter_per_epoch: 500
-n_epoch: 20
+n_epoch: 40
 
 # Others
 seed: 1

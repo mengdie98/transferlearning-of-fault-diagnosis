@@ -41,6 +41,7 @@ class AdversarialLoss(nn.Module):
         return adv_loss
     
     def get_adversarial_result(self, x, source=True, lamb=1.0):
+        # self.domain_classifier = Discriminator()
         x = ReverseLayerF.apply(x, lamb)
         domain_pred = self.domain_classifier(x)
         device = domain_pred.device

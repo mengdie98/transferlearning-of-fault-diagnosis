@@ -17,6 +17,7 @@ def get_backbone(name):
         return AlexNetBackbone()
     elif "dann" == name.lower():
         return DaNNBackbone()
+    
 
 class DaNNBackbone(nn.Module):
     def __init__(self, n_input=224*224*3, n_hidden=256):
@@ -52,8 +53,9 @@ class DaNNBackbone(nn.Module):
 class AlexNetBackbone(nn.Module):
     def __init__(self):
         super(AlexNetBackbone, self).__init__()
-        model_alexnet = models.alexnet(pretrained=True)
+        model_alexnet = models.alexnet(pretrained=False)
         self.features = model_alexnet.features
+
         self.classifier = nn.Sequential()
         for i in range(6):
             self.classifier.add_module(
@@ -72,7 +74,7 @@ class AlexNetBackbone(nn.Module):
 class ResNetBackbone(nn.Module):
     def __init__(self, network_type):
         super(ResNetBackbone, self).__init__()
-        resnet = resnet_dict[network_type](pretrained=True)
+        resnet = resnet_dict[network_type](pretrained=False)
         self.conv1 = resnet.conv1
         self.bn1 = resnet.bn1
         self.relu = resnet.relu

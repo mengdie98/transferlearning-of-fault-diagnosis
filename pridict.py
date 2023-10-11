@@ -1,16 +1,9 @@
 import os
-import argparse
-import numpy as np
-from PIL import Image, ImageStat
+from PIL import Image
 import torch
-from torch.utils.data import Dataset, DataLoader, random_split
-import torchvision
-from dataloader import load_split_data
-import random
-import utils
-import pandas as pd
+from data_loader import load_split_data
 import models
-from torchvision import transforms,datasets
+from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 import json
