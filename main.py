@@ -11,6 +11,7 @@ import csv
 import torch
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+import os
 
 def get_parser():
     """Get default arguments."""
@@ -57,6 +58,7 @@ def get_parser():
     parser.add_argument('--transfer_loss', type=str, default='new')
     parser.add_argument('--weights', type=str, default='resnet18_111.pth')
     return parser
+
 
 def set_random_seed(seed=0):
     # seed setting
@@ -163,6 +165,7 @@ def train(source_loader, target_train_loader, target_test_loader, model, optimiz
         # Test
         stop += 1
         test_acc, test_loss = test(model, target_test_loader, args)
+        log.append([e, train_loss_clf.avg, train_loss_transfer.avg, train_loss_total.avg, test_loss, test_acc])
         info += ', test_loss {:4f}, test_acc: {:.4f}'.format(test_loss, test_acc)
         log.append([e, train_loss_clf.avg, train_loss_transfer.avg, train_loss_total.avg, test_loss, test_acc])
         # np_log = np.array(log, dtype=float)
@@ -220,7 +223,9 @@ def main():
     args = parser.parse_args()
     setattr(args, "device", torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
     print(args)
-    set_random_seed(args.seed)
+    # a=random.randint(0,10240)
+    # print("seed=",a)
+    # set_random_seed(a)
     source_loader, target_train_loader, target_test_loader, n_class = load_data(args)
     setattr(args, "n_class", n_class)
     if args.epoch_based_training:
@@ -299,8 +304,10 @@ def pretrain(path,name):
     model = get_model(args)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
     # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     models.pretrain(train_loader, test_loader, model, optimizer, args)
     try:
+        torch.save(model.state_dict(), name)
         torch.save(model.state_dict(), name)
     except:
         torch.save(model.state_dict(), 'mymodel_resnet18.pt')

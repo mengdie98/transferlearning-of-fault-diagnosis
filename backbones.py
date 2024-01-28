@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 from torchvision import models
+import torch.utils.model_zoo as model_zoo
 
 resnet_dict = {
     "resnet18": models.resnet18,
@@ -74,7 +75,13 @@ class AlexNetBackbone(nn.Module):
 class ResNetBackbone(nn.Module):
     def __init__(self, network_type):
         super(ResNetBackbone, self).__init__()
-        resnet = resnet_dict[network_type](pretrained=False)
+        
+        model_url = 'http://download.pytorch.org/models/resnet18-5c106cde.pth'
+        # model_url = 'http://download.pytorch.org/models/resnet18-f37072fd.pth'
+        state_dict = model_zoo.load_url(model_url, progress=True)
+        # 加载预训练模型的参数
+        resnet = resnet_dict[network_type](pretrained=True)
+        # self.resnet.load_state_dict(state_dict)
         self.conv1 = resnet.conv1
         self.bn1 = resnet.bn1
         self.relu = resnet.relu
@@ -102,3 +109,9 @@ class ResNetBackbone(nn.Module):
     
     def output_num(self):
         return self._feature_dim
+    
+if __name__ == '__main__':  
+    model = ResNetBackbone('resnet18')
+    input_tensor = torch.randn(32, 3, 224, 224)  # 示例中的输入张量是1个样本的3x256x256
+    output_tensor = model(input_tensor)
+    print(output_tensor.shape)

@@ -172,6 +172,11 @@ def get_pretrain_model(args, weights_path, n_class):
                 file.write(str(e) + "\n")
     return model
 
+def get_model(args, weights_path=''):
+    model = TransferNet(
+        6, transfer_loss=args.transfer_loss, base_net=args.backbone, max_iter=args.max_iter, use_bottleneck=args.use_bottleneck).to(args.device)
+    return model
+
 def test(model, test_loader, args):
     model.eval().to(args.DEVICE)
     correct = 0
@@ -218,7 +223,11 @@ def pretrain(train_loader, test_loader, model, optimizer, args):
         print(f'Epoch: [{e:2d}/{args.n_epoch}], train_loss: {train_loss.avg:.4f}, acc: {acc:.4f}')
         acc=format(acc)
         acc=float(acc)
+<<<<<<< HEAD
         best_acc=96
+=======
+        best_acc=90
+>>>>>>> 13980b57e7d4bdc14c29c0f6cc8533dd635e25e1
         if best_acc > acc:
             stop = 0
         if stop >= args.early_stop:

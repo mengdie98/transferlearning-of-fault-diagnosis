@@ -1,8 +1,17 @@
 {
+<<<<<<< HEAD
     "0": "baseline",
     "1": "cage_crack",
     "2": "outer_crack_0.5mm_Opposite",
     "3": "outer_pitting_moderate",
     "4": "roller_crack_0.8mm",
     "5": "roller_pitting_severe"
+=======
+    "0": "ball",
+    "1": "inner_ring",
+    "2": "normal",
+    "3": "outer_ring_12",
+    "4": "outer_ring_3",
+    "5": "outer_ring_6"
+>>>>>>> 13980b57e7d4bdc14c29c0f6cc8533dd635e25e1
 }

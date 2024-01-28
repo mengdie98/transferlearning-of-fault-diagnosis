@@ -46,16 +46,18 @@ def GetT_FDomainGraph(name, df, path, p):
         fig = plt.figure(figsize=(3, 3))    #以长24英寸 宽6英寸的大小创建一个窗口，一个单位100分辨率
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)   #表示四个方向上的，图表与画布边缘之间的距离
 
-        plt.contourf(t, result[0][1], abs(result[0][0]))
+        plt.contourf(t, result[0][1], abs(result[0][0]), cmap='gray')
         plt.axis('off')
         plt.colorbar(shrink=0.5).remove()
-        save_path = path.replace('CWRUData', 'CWRUDatapic')
+        # save_path = path.replace('CWRUData', 'CWRUData-pic-gary')
+        # save_path = path.replace('CWRUData', 'CWRUData-pic-gary')
+        save_path = r'E:\毕设论文\PI训练集\仿真'+'\\'+os.path.splitext(name)[0]
         # for i in range(14):
         #     os.makedirs(save_path + '\\' + str(i), exist_ok=True)
         # os.path.splitext用于将文件路径分割成文件名和扩展名两部分，该函数返回一个元组
         filename = os.path.splitext(name)[0]+f'_{int(a/200)}'+'.png'
-        if not os.path.exists(os.path.dirname(save_path+'\\')):
-            os.makedirs(os.path.dirname(save_path+'\\'))
+        if not os.path.exists(os.path.dirname(save_path+'\\'+os.path.splitext(name)[0])):
+            os.makedirs(os.path.dirname(save_path+'\\'+os.path.splitext(name)[0]))
         plt.savefig(os.path.join(save_path, filename),bbox_inches='tight', pad_inches=0)
         plt.clf()
         plt.close(fig)
@@ -76,14 +78,14 @@ def main(path):
                     data = scipy.io.loadmat(os.path.join(filepath, filename))
                     SourceData = pd.DataFrame()
                     var_names = data.keys()
-                    fe_vars = [var for var in var_names if 'FE' in var]
+                    fe_vars = [var for var in var_names if 'YY' in var]
                     
                     fe_data = {var: data[var] for var in fe_vars}
                     # SourceData[fe_vars] = pd.Series(fe_data)
                     for key in fe_vars:
                         a=fe_data[key].flatten()
                         SourceData[key] = pd.Series(a)
-                        SourceData = [SourceData[a] for a in SourceData.columns if 'FE' in a]
+                        SourceData = [SourceData[a] for a in SourceData.columns if 'YY' in a]
                         GetT_FDomainGraph(filename, SourceData, filepath, p)
                 else :
                     continue
@@ -103,11 +105,11 @@ if __name__ == '__main__':
     # main(path)
     # path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1730\7\outer_ring_3'
     # main(path)
-    # path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1730\21'
-    # main(path)
+    path = r'E:\毕设论文\西储大学四自由度轴承仿真数据及其对应试验数据\仿真'
+    main(path)
     # path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1772\21'
     # main(path)
-    path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1750\21'
-    main(path)
+    # path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1750\21'
+    # main(path)
     # path = r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData\12K_Drive_End\1797\21'
     # main(path)

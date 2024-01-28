@@ -1,5 +1,9 @@
 # Backbone
+<<<<<<< HEAD
 backbone: resnet18
+=======
+backbone: resnet34
+>>>>>>> 13980b57e7d4bdc14c29c0f6cc8533dd635e25e1
 
 # Transfer loss related
 transfer_loss_weight: 0.5

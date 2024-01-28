@@ -25,8 +25,13 @@ parser.add_argument('--n_epoch', type=int, default=50)
 parser.add_argument('--momentum', type=float, default=0.9)
 parser.add_argument('--decay', type=float, default=5e-4)
 parser.add_argument('--data', type=str,
+<<<<<<< HEAD
                     default=r'E:\毕设论文\CWRU\CWRU_xjs\CWRUData-picture\12K_Drive_End\1730\7')
 parser.add_argument('--early_stop', type=int, default=20)
+=======
+                    default=r'D:\data\CWRUData-picture\CWRUData-picture\12K_Drive_End\1730\7')
+parser.add_argument('--early_stop', type=int, default=15)
+>>>>>>> 13980b57e7d4bdc14c29c0f6cc8533dd635e25e1
 parser.add_argument('--lamb', type=float, default=.01)
 args = parser.parse_args()
 
